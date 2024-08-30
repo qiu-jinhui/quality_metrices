@@ -1,0 +1,302 @@
+<html><head><base href="https://codequalitydashboard.example.com/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Quality Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22256%22 height=%22256%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%2334495e%22></rect><path d=%22M30 50L45 65L70 35%22 stroke=%22%23ffffff%22 stroke-width=%228%22 fill=%22none%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22></path></svg>" />
+  <style>
+    :root {
+      --primary-color: #34495e;
+      --secondary-color: #2c3e50;
+      --accent-color: #3498db;
+      --background-color: #ecf0f1;
+      --text-color: #2c3e50;
+      --widget-background: #ffffff;
+      --widget-border: #bdc3c7;
+      --rating-a: #27ae60;
+      --rating-b: #2ecc71;
+      --rating-c: #f39c12;
+      --rating-d: #e67e22;
+      --rating-e: #e74c3c;
+    }
+    body {
+      font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+    .header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 2em;
+      font-weight: 300;
+    }
+    .project-selector, .overall-dashboard-btn, .back-to-project-btn, .download-data-btn, .save-btn, .show-popup-btn {
+      padding: 10px 15px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      background-color: var(--accent-color);
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-left: 15px;
+    }
+    .project-selector {
+      background-color: var(--secondary-color);
+    }
+    .project-selector:hover, .overall-dashboard-btn:hover, .back-to-project-btn:hover, .download-data-btn:hover, .save-btn:hover, .show-popup-btn:hover {
+      background-color: var(--secondary-color);
+    }
+    .config-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 15px;
+    }
+    .config-icon {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+    .dashboard, .overall-dashboard, .config-page {
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: minmax(220px, auto);
+      gap: 25px;
+    }
+    .widget {
+      background-color: var(--widget-background);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      padding: 25px;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--widget-border);
+    }
+    .widget:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+    }
+    .widget.large {
+      grid-row: span 2;
+    }
+    .widget.small {
+      height: 220px;
+    }
+    h2 {
+      margin-top: 0;
+      color: var(--primary-color);
+      font-size: 1.4em;
+      font-weight: 500;
+      border-bottom: 2px solid var(--widget-border);
+      padding-bottom: 10px;
+    }
+    .metric {
+      font-size: 3em;
+      font-weight: 300;
+      text-align: center;
+      margin: auto 0;
+      color: var(--accent-color);
+    }
+    .count-container, .violations-breakdown {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .count-item, .violation-type {
+      text-align: center;
+    }
+    .count-number, .violation-count {
+      font-size: 3.2em;
+      font-weight: 300;
+      color: var(--accent-color);
+    }
+    .count-label, .violation-label {
+      font-size: 1em;
+      color: var(--text-color);
+      margin-top: 5px;
+    }
+    .maintenance-rating {
+      text-align: center;
+      font-size: 5em;
+      font-weight: 300;
+      width: 120px;
+      height: 120px;
+      line-height: 120px;
+      border-radius: 50%;
+      margin: auto;
+      color: white;
+    }
+    .maintenance-description {
+      text-align: center;
+      font-size: 1.2em;
+      color: var(--text-color);
+      margin-top: 10px;
+    }
+    .severity-blocker { color: #c0392b; }
+    .severity-critical { color: #e74c3c; }
+    .severity-major { color: #d35400; }
+    .severity-minor { color: #f39c12; }
+    .severity-info { color: var(--accent-color); }
+    .bugs { color: #e74c3c; }
+    .code-smells { color: #f39c12; }
+    .vulnerabilities { color: #8e44ad; }
+    .severity-breakdown {
+      margin-top: 20px;
+      border-top: 1px solid var(--widget-border);
+      padding-top: 20px;
+    }
+    .severity-breakdown h3 {
+      color: var(--primary-color);
+      font-size: 1.2em;
+      margin-bottom: 15px;
+    }
+    .overall-dashboard table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--widget-background);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    .overall-dashboard th, .overall-dashboard td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid var(--widget-border);
+    }
+    .overall-dashboard th {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .overall-dashboard tr:hover {
+      background-color: var(--background-color);
+    }
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    #projectConfig {
+      width: 100%;
+      height: 300px;
+      margin-bottom: 20px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      border: 1px solid var(--widget-border);
+      border-radius: 5px;
+      resize: vertical;
+    }
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .popup-content {
+      background-color: var(--widget-background);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      max-width: 500px;
+      width: 100%;
+    }
+    .popup-close {
+      float: right;
+      font-size: 1.5em;
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <h1>Code Quality Dashboard</h1>
+      <div>
+        <select id="projectSelector" class="project-selector">
+          <option value="wsit-wcl-bblsmp-pa-intelligentservice">wsit-wcl-bblsmp-pa-intelligentservice</option>
+          <option value="wsit-wcl-bblsmp-pa-inbound">wsit-wcl-bblsmp-pa-inbound</option>
+          <option value="wsit-wcl-bblsmp-pa-ocr-result-retrieval">wsit-wcl-bblsmp-pa-ocr-result-retrieval</option>
+        </select>
+        <button id="overallDashboardBtn" class="overall-dashboard-btn">Overall Dashboard</button>
+        <button id="configBtn" class="config-btn" title="Project Configuration">
+          <svg class="config-icon" viewBox="0 0 24 24">
+            <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+          </svg>
+        </button>
+        <button id="showPopupBtn" class="show-popup-btn">Show Popup</button>
+      </div>
+    </div>
+  </div>
+  <div id="projectDashboard" class="dashboard">
+    <!-- ... (previous dashboard content remains unchanged) ... -->
+  </div>
+
+  <div id="overallDashboard" class="overall-dashboard" style="display: none;">
+    <!-- ... (previous overall dashboard content remains unchanged) ... -->
+  </div>
+
+  <div id="configPage" class="config-page" style="display: none;">
+    <!-- ... (previous config page content remains unchanged) ... -->
+  </div>
+
+  <div id="popupOverlay" class="popup-overlay" style="display: none;">
+    <div class="popup-content">
+      <span class="popup-close" id="closePopup">&times;</span>
+      <h2>Popup Window</h2>
+      <p>This is a sample popup window. You can customize its content as needed.</p>
+    </div>
+  </div>
+
+  <script>
+    // ... (previous JavaScript code remains unchanged) ...
+
+    // New code for popup functionality
+    const showPopupBtn = document.getElementById('showPopupBtn');
+    const popupOverlay = document.getElementById('popupOverlay');
+    const closePopup = document.getElementById('closePopup');
+
+    showPopupBtn.addEventListener('click', () => {
+      popupOverlay.style.display = 'flex';
+    });
+
+    closePopup.addEventListener('click', () => {
+      popupOverlay.style.display = 'none';
+    });
+
+    popupOverlay.addEventListener('click', (event) => {
+      if (event.target === popupOverlay) {
+        popupOverlay.style.display = 'none';
+      }
+    });
+
+    // ... (rest of the previous JavaScript code remains unchanged) ...
+  </script>
+</body>
+</html>
